@@ -1,0 +1,24 @@
+---
+# Source: oncall/templates/engine/service-internal.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-oncall-engine
+  labels:
+    helm.sh/chart: oncall-1.0.1
+    app.kubernetes.io/name: oncall
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v1.0.3"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: engine
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: oncall
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: engine

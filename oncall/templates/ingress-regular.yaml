@@ -1,0 +1,38 @@
+---
+# Source: oncall/templates/ingress-regular.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-oncall
+  labels:
+    helm.sh/chart: oncall-1.0.1
+    app.kubernetes.io/name: oncall
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v1.0.3"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    cert-manager.io/issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+  - hosts:
+    - "example.com"
+    secretName: certificate-tls
+  rules:
+  - host: "example.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: release-name-oncall-engine
+            port:
+              number: 8080
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: release-name-grafana
+            port:
+              number: 80

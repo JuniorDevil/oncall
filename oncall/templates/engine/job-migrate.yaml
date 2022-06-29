@@ -1,0 +1,100 @@
+---
+# Source: oncall/templates/engine/job-migrate.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: release-name-oncall-engine-migrate-2022-06-29-21-29-38
+  labels:
+    helm.sh/chart: oncall-1.0.1
+    app.kubernetes.io/name: oncall
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "v1.0.3"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: engine
+spec:
+  ttlSecondsAfterFinished: 20
+  template:
+    metadata:
+      name: release-name-oncall-engine-migrate-2022-06-29-21-29-38
+      labels:
+        app.kubernetes.io/name: oncall
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: engine
+    spec:
+      restartPolicy: Never
+      serviceAccountName: release-name-oncall
+      securityContext:
+        {}
+      containers:
+      - name: oncall-migrate
+        securityContext:
+            {}
+        image: "grafana/oncall:v1.0.3"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            until (nc -vz $MYSQL_HOST $MYSQL_PORT);
+            do
+                echo "waiting for MySQL"; sleep 1;
+            done
+            python manage.py migrate
+        env:
+            - name: BASE_URL
+              value: https://example.com
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-oncall
+                  key: SECRET_KEY
+            - name: MIRAGE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-oncall
+                  key: MIRAGE_SECRET_KEY
+            - name: MIRAGE_CIPHER_IV
+              value: "1234567890abcdef"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "settings.helm"
+            - name: AMIXR_DJANGO_ADMIN_PATH
+              value: "admin"
+            - name: OSS
+              value: "True"
+            - name: UWSGI_LISTEN
+              value: "1024"
+            - name: MYSQL_HOST
+              value: release-name-mariadb
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_DB_NAME
+              value: "oncall"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-mariadb
+                  key: mariadb-root-password
+            - name: RABBITMQ_USERNAME
+              value: "user"
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-rabbitmq
+                  key: rabbitmq-password
+            - name: RABBITMQ_HOST
+              value: release-name-rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: REDIS_HOST
+              value: release-name-redis-master
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: release-name-redis
+                  key: redis-password
+        resources:
+            {}

@@ -1,0 +1,13 @@
+---
+# Source: oncall/charts/cert-manager/templates/webhook-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-cert-manager-webhook
+  namespace: "default"
+  labels:
+    app: webhook
+    app.kubernetes.io/name: webhook
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: "webhook"
+data:
